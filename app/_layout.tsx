@@ -1,29 +1,53 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
+// app/_layout.tsx
 import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import 'react-native-reanimated';
-
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { useEffect } from 'react';
+import { useColorScheme } from 'react-native';
+import { useThemeStore } from '../stores/themeStore';
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-  });
+    const colorScheme = useColorScheme();
+    const { setTheme } = useThemeStore();
 
-  if (!loaded) {
-    // Async font loading only occurs in development.
-    return null;
-  }
+    useEffect(() => {
+        // Aplicar tema baseado nas configurações do sistema
+        if (colorScheme) {
+            setTheme(colorScheme);
+        }
+    }, [colorScheme, setTheme]);
 
-  return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
-  );
+    return (
+        <Stack
+            screenOptions={{
+                headerShown: false,
+                gestureEnabled: true,
+                animation: 'slide_from_right',
+            }}
+        >
+            <Stack.Screen
+                name="index"
+                options={{
+                    headerShown: false
+                }}
+            />
+            <Stack.Screen
+                name="onboarding"
+                options={{
+                    headerShown: false,
+                    gestureEnabled: false
+                }}
+            />
+            <Stack.Screen
+                name="auth"
+                options={{
+                    headerShown: false
+                }}
+            />
+            <Stack.Screen
+                name="(tabs)"
+                options={{
+                    headerShown: false
+                }}
+            />
+        </Stack>
+    );
 }

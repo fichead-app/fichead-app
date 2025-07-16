@@ -1,176 +1,166 @@
-// app/onboarding/age.tsx
+// app/onboarding/age.tsx - Usando OnboardingLayout
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Button } from '../../components/Button';
-import { Layout } from '../../components/Layout';
+import { Alert, Keyboard, StyleSheet, Text, TouchableWithoutFeedback, View } from 'react-native';
+import { Input } from '../../components/Input';
+import { OnboardingLayout } from '../../components/OnboardingLayout';
 import { useThemeStore } from '../../stores/themeStore';
 import { useUserStore } from '../../stores/userStore';
-
-type AgeRange = '14-17' | '18-24' | '25-29' | '30-34' | '35-39' | '40-44' | '45-49' | '50+';
 
 export default function OnboardingAge() {
     const router = useRouter();
     const { theme } = useThemeStore();
     const { updateUser } = useUserStore();
-    const [selectedAge, setSelectedAge] = useState<AgeRange>('25-29');
-
-    const handleBack = () => {
-        router.back();
-    };
+    const [age, setAge] = useState('');
 
     const handleContinue = () => {
-        updateUser({ ageRange: selectedAge });
-        router.push('/onboarding/genres');
+        Keyboard.dismiss();
+
+        const numericAge = parseInt(age);
+
+        if (!age.trim()) {
+            Alert.alert('Error', 'Please enter your age');
+            return;
+        }
+
+        if (isNaN(numericAge) || numericAge < 1 || numericAge > 120) {
+            Alert.alert('Error', 'Please enter a valid age between 1 and 120');
+            return;
+        }
+
+        if (numericAge < 13) {
+            Alert.alert('Age Restriction', 'You must be at least 13 years old to use this app');
+            return;
+        }
+
+        updateUser({ age: numericAge });
+
+        setTimeout(() => {
+            router.push('/onboarding/genres');
+        }, 100);
     };
 
-    const ageOptions: AgeRange[] = [
-        '14-17', '18-24', '25-29', '30-34',
-        '35-39', '40-44', '45-49', '50+'
-    ];
+    const handleSkip = () => {
+        Keyboard.dismiss();
+        setTimeout(() => {
+            router.push('/onboarding/genres');
+        }, 100);
+    };
+
+    const dismissKeyboard = () => {
+        Keyboard.dismiss();
+    };
 
     return (
-        <Layout>
-            <View style={styles.container}>
-                {/* Header */}
-                <View style={styles.header}>
-                    <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+        <TouchableWithoutFeedback onPress={dismissKeyboard}>
+            <OnboardingLayout
+                title="How Old Are You? 🎂"
+                subtitle="This helps us recommend age-appropriate content for you"
+                progressWidth="50%"
+                onContinue={handleContinue}
+                onSkip={handleSkip}
+                showSkip={true}
+            >
+                <View style={styles.inputContainer}>
+                    <Input
+                        label="Your Age"
+                        value={age}
+                        onChangeText={setAge}
+                        placeholder="Enter your age"
+                        keyboardType="numeric"
+                        maxLength={3}
+                        returnKeyType="done"
+                        onSubmitEditing={handleContinue}
+                        blurOnSubmit={true}
+                    />
+
+                    <View style={styles.infoContainer}>
                         <Ionicons
-                            name="chevron-back"
-                            size={24}
-                            color={theme.colors.text}
+                            name="information-circle-outline"
+                            size={16}
+                            color={theme.colors.textSecondary}
                         />
-                    </TouchableOpacity>
-
-                    {/* Progress Bar */}
-                    <View style={styles.progressBar}>
-                        <View style={[styles.progressFill, {
-                            backgroundColor: theme.colors.primary,
-                            width: '50%'
-                        }]} />
+                        <Text style={[styles.infoText, { color: theme.colors.textSecondary }]}>
+                            You must be at least 13 years old to use this app
+                        </Text>
                     </View>
                 </View>
 
-                {/* Content */}
-                <View style={styles.content}>
-                    <View style={styles.titleContainer}>
-                        <Text style={[styles.title, { color: theme.colors.text }]}>
-                            Choose Your Age 🎯
-                        </Text>
-                        <Text style={[styles.subtitle, { color: theme.colors.textSecondary }]}>
-                            Select age range for better content.
+                <View style={styles.benefitsContainer}>
+                    <Text style={[styles.benefitsTitle, { color: theme.colors.text }]}>
+                        Why we ask for your age:
+                    </Text>
+
+                    <View style={styles.benefitItem}>
+                        <View style={[styles.benefitIcon, { backgroundColor: theme.colors.primary }]}>
+                            <Ionicons name="book" size={16} color={theme.colors.white} />
+                        </View>
+                        <Text style={[styles.benefitText, { color: theme.colors.textSecondary }]}>
+                            Age-appropriate book recommendations
                         </Text>
                     </View>
 
-                    <View style={styles.optionsContainer}>
-                        {ageOptions.map((age, index) => (
-                            <TouchableOpacity
-                                key={age}
-                                style={[
-                                    styles.optionButton,
-                                    {
-                                        borderColor: selectedAge === age
-                                            ? theme.colors.primary
-                                            : theme.colors.border,
-                                        backgroundColor: selectedAge === age
-                                            ? theme.colors.primary
-                                            : 'transparent',
-                                    },
-                                    // Arrange in 2 columns
-                                    index % 2 === 0 ? styles.leftColumn : styles.rightColumn
-                                ]}
-                                onPress={() => setSelectedAge(age)}
-                            >
-                                <Text style={[
-                                    styles.optionText,
-                                    {
-                                        color: selectedAge === age
-                                            ? theme.colors.white
-                                            : theme.colors.text,
-                                        fontWeight: selectedAge === age ? '600' : '500'
-                                    }
-                                ]}>
-                                    {age}
-                                </Text>
-                            </TouchableOpacity>
-                        ))}
+                    <View style={styles.benefitItem}>
+                        <View style={[styles.benefitIcon, { backgroundColor: theme.colors.primary }]}>
+                            <Ionicons name="shield-checkmark" size={16} color={theme.colors.white} />
+                        </View>
+                        <Text style={[styles.benefitText, { color: theme.colors.textSecondary }]}>
+                            Content filtering and safety
+                        </Text>
+                    </View>
+
+                    <View style={styles.benefitItem}>
+                        <View style={[styles.benefitIcon, { backgroundColor: theme.colors.primary }]}>
+                            <Ionicons name="trending-up" size={16} color={theme.colors.white} />
+                        </View>
+                        <Text style={[styles.benefitText, { color: theme.colors.textSecondary }]}>
+                            Personalized reading experience
+                        </Text>
                     </View>
                 </View>
-
-                {/* Continue Button */}
-                <Button
-                    title="Continue"
-                    onPress={handleContinue}
-                    style={styles.continueButton}
-                />
-            </View>
-        </Layout>
+            </OnboardingLayout>
+        </TouchableWithoutFeedback>
     );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
+    inputContainer: {
+        marginBottom: 24,
     },
-    header: {
+    infoContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 32,
+        gap: 8,
+        marginTop: 8,
     },
-    backButton: {
-        marginRight: 16,
-        padding: 4,
-    },
-    progressBar: {
-        flex: 1,
-        height: 4,
-        backgroundColor: '#E5E7EB',
-        borderRadius: 2,
-    },
-    progressFill: {
-        height: '100%',
-        borderRadius: 2,
-    },
-    content: {
+    infoText: {
+        fontSize: 14,
         flex: 1,
     },
-    titleContainer: {
-        marginBottom: 32,
+    benefitsContainer: {
+        marginTop: 8,
     },
-    title: {
-        fontSize: 24,
-        fontWeight: '700',
-        marginBottom: 8,
-    },
-    subtitle: {
+    benefitsTitle: {
         fontSize: 16,
-        lineHeight: 24,
+        fontWeight: '600',
+        marginBottom: 16,
     },
-    optionsContainer: {
+    benefitItem: {
         flexDirection: 'row',
-        flexWrap: 'wrap',
-        gap: 12,
-    },
-    optionButton: {
-        paddingVertical: 16,
-        paddingHorizontal: 24,
-        borderRadius: 25,
-        borderWidth: 1,
         alignItems: 'center',
+        marginBottom: 12,
+    },
+    benefitIcon: {
+        width: 32,
+        height: 32,
+        borderRadius: 16,
         justifyContent: 'center',
-        minHeight: 56,
+        alignItems: 'center',
+        marginRight: 12,
     },
-    leftColumn: {
-        width: '48%',
-    },
-    rightColumn: {
-        width: '48%',
-    },
-    optionText: {
-        fontSize: 16,
-    },
-    continueButton: {
-        marginTop: 24,
+    benefitText: {
+        fontSize: 14,
+        flex: 1,
     },
 });

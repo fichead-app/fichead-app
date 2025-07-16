@@ -1,7 +1,7 @@
 // stores/userStore.ts
 import { create } from 'zustand';
 
-export interface User {
+interface User {
     id: string;
     fullName: string;
     email: string;
@@ -9,7 +9,7 @@ export interface User {
     dateOfBirth: string;
     country: string;
     gender: 'male' | 'female' | 'not_specified';
-    ageRange: string;
+    age: number; // Mudança: de ageRange para age
     favoriteGenres: string[];
     avatar?: string;
 }
@@ -50,7 +50,7 @@ export const useUserStore = create<UserState>((set, get) => ({
                 dateOfBirth: '12/27/1995',
                 country: 'United States',
                 gender: 'male',
-                ageRange: '25-29',
+                age: 28, // Mudança: valor numérico direto
                 favoriteGenres: ['Thriller', 'Comedy', 'Comics', 'Art & Photography', 'Science & Technology', 'Guide / How-to'],
             };
 

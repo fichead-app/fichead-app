@@ -1,188 +1,219 @@
-// app/onboarding/gender.tsx
+// app/onboarding/gender.tsx - Usando OnboardingLayout
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Button } from '../../components/Button';
-import { Layout } from '../../components/Layout';
+import { OnboardingLayout } from '../../components/OnboardingLayout';
 import { useThemeStore } from '../../stores/themeStore';
 import { useUserStore } from '../../stores/userStore';
 
-type GenderOption = 'male' | 'female' | 'not_specified';
+type Gender = 'male' | 'female' | 'not_specified';
+
+interface GenderOption {
+    value: Gender;
+    label: string;
+    icon: keyof typeof Ionicons.glyphMap;
+    description: string;
+}
+
+const genderOptions: GenderOption[] = [
+    {
+        value: 'male',
+        label: 'Male',
+        icon: 'male',
+        description: 'I identify as male'
+    },
+    {
+        value: 'female',
+        label: 'Female',
+        icon: 'female',
+        description: 'I identify as female'
+    },
+    {
+        value: 'not_specified',
+        label: 'Prefer not to say',
+        icon: 'person',
+        description: 'I prefer not to specify'
+    }
+];
 
 export default function OnboardingGender() {
     const router = useRouter();
     const { theme } = useThemeStore();
     const { updateUser } = useUserStore();
-    const [selectedGender, setSelectedGender] = useState<GenderOption>('male');
-
-    const handleBack = () => {
-        router.back();
-    };
+    const [selectedGender, setSelectedGender] = useState<Gender | null>(null);
 
     const handleContinue = () => {
-        updateUser({ gender: selectedGender });
+        if (selectedGender) {
+            updateUser({ gender: selectedGender });
+            router.push('/onboarding/age');
+        }
+    };
+
+    const handleSkip = () => {
+        updateUser({ gender: 'not_specified' });
         router.push('/onboarding/age');
     };
 
-    const genderOptions = [
-        { value: 'male', label: 'I am male' },
-        { value: 'female', label: 'I am female' },
-        { value: 'not_specified', label: 'Rather not to say' },
-    ] as const;
+    const selectGender = (gender: Gender) => {
+        setSelectedGender(gender);
+    };
 
     return (
-        <Layout>
-            <View style={styles.container}>
-                {/* Header */}
-                <View style={styles.header}>
-                    <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-                        <Ionicons
-                            name="chevron-back"
-                            size={24}
-                            color={theme.colors.text}
-                        />
-                    </TouchableOpacity>
-
-                    {/* Progress Bar */}
-                    <View style={styles.progressBar}>
-                        <View style={[styles.progressFill, {
-                            backgroundColor: theme.colors.primary,
-                            width: '25%'
-                        }]} />
-                    </View>
-                </View>
-
-                {/* Content */}
-                <View style={styles.content}>
-                    <View style={styles.titleContainer}>
-                        <Text style={[styles.title, { color: theme.colors.text }]}>
-                            What is your gender? ♂️
-                        </Text>
-                        <Text style={[styles.subtitle, { color: theme.colors.textSecondary }]}>
-                            Select gender for better content.
-                        </Text>
-                    </View>
-
-                    <View style={styles.optionsContainer}>
-                        {genderOptions.map((option) => (
-                            <TouchableOpacity
-                                key={option.value}
-                                style={[
-                                    styles.optionButton,
-                                    {
-                                        borderColor: selectedGender === option.value
-                                            ? theme.colors.primary
-                                            : theme.colors.border,
-                                        backgroundColor: selectedGender === option.value
-                                            ? theme.colors.secondary
-                                            : theme.colors.surface,
+        <OnboardingLayout
+            title="What's Your Gender? 👤"
+            subtitle="This helps us personalize your experience and recommend content that matches your preferences"
+            progressWidth="25%"
+            onContinue={handleContinue}
+            onSkip={handleSkip}
+            showSkip={true}
+            continueDisabled={!selectedGender}
+        >
+            <View style={styles.genderContainer}>
+                {genderOptions.map((option) => (
+                    <TouchableOpacity
+                        key={option.value}
+                        style={[
+                            styles.genderOption,
+                            {
+                                borderColor: selectedGender === option.value
+                                    ? theme.colors.primary
+                                    : theme.colors.border,
+                                backgroundColor: selectedGender === option.value
+                                    ? theme.colors.secondary
+                                    : theme.colors.surface,
+                            }
+                        ]}
+                        onPress={() => selectGender(option.value)}
+                    >
+                        <View style={styles.genderContent}>
+                            <View style={[
+                                styles.genderIcon,
+                                {
+                                    backgroundColor: selectedGender === option.value
+                                        ? theme.colors.primary
+                                        : theme.colors.border,
+                                }
+                            ]}>
+                                <Ionicons
+                                    name={option.icon}
+                                    size={24}
+                                    color={selectedGender === option.value
+                                        ? theme.colors.white
+                                        : theme.colors.textSecondary
                                     }
-                                ]}
-                                onPress={() => setSelectedGender(option.value)}
-                            >
-                                <View style={styles.radioContainer}>
-                                    <View style={[
-                                        styles.radioOuter,
-                                        {
-                                            borderColor: selectedGender === option.value
-                                                ? theme.colors.primary
-                                                : theme.colors.border
-                                        }
-                                    ]}>
-                                        {selectedGender === option.value && (
-                                            <View style={[styles.radioInner, { backgroundColor: theme.colors.primary }]} />
-                                        )}
-                                    </View>
-                                    <Text style={[styles.optionText, { color: theme.colors.text }]}>
-                                        {option.label}
-                                    </Text>
-                                </View>
-                            </TouchableOpacity>
-                        ))}
-                    </View>
-                </View>
+                                />
+                            </View>
 
-                {/* Continue Button */}
-                <Button
-                    title="Continue"
-                    onPress={handleContinue}
-                    style={styles.continueButton}
-                />
+                            <View style={styles.genderText}>
+                                <Text style={[
+                                    styles.genderLabel,
+                                    {
+                                        color: selectedGender === option.value
+                                            ? theme.colors.primary
+                                            : theme.colors.text,
+                                        fontWeight: selectedGender === option.value ? '600' : '500'
+                                    }
+                                ]}>
+                                    {option.label}
+                                </Text>
+                                <Text style={[
+                                    styles.genderDescription,
+                                    { color: theme.colors.textSecondary }
+                                ]}>
+                                    {option.description}
+                                </Text>
+                            </View>
+
+                            {selectedGender === option.value && (
+                                <View style={styles.selectedIndicator}>
+                                    <Ionicons
+                                        name="checkmark-circle"
+                                        size={20}
+                                        color={theme.colors.primary}
+                                    />
+                                </View>
+                            )}
+                        </View>
+                    </TouchableOpacity>
+                ))}
             </View>
-        </Layout>
+
+            {/* Privacy Info */}
+            <View style={styles.privacyContainer}>
+                <View style={styles.privacyHeader}>
+                    <Ionicons
+                        name="lock-closed"
+                        size={16}
+                        color={theme.colors.textSecondary}
+                    />
+                    <Text style={[styles.privacyTitle, { color: theme.colors.text }]}>
+                        Privacy Notice
+                    </Text>
+                </View>
+                <Text style={[styles.privacyText, { color: theme.colors.textSecondary }]}>
+                    Your gender information is kept private and secure. We use this data only to improve your personalized experience and will never share it with third parties.
+                </Text>
+            </View>
+        </OnboardingLayout>
     );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-    },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 32,
-    },
-    backButton: {
-        marginRight: 16,
-        padding: 4,
-    },
-    progressBar: {
-        flex: 1,
-        height: 4,
-        backgroundColor: '#E5E7EB',
-        borderRadius: 2,
-    },
-    progressFill: {
-        height: '100%',
-        borderRadius: 2,
-    },
-    content: {
-        flex: 1,
-    },
-    titleContainer: {
-        marginBottom: 32,
-    },
-    title: {
-        fontSize: 24,
-        fontWeight: '700',
-        marginBottom: 8,
-    },
-    subtitle: {
-        fontSize: 16,
-        lineHeight: 24,
-    },
-    optionsContainer: {
+    genderContainer: {
         gap: 16,
+        marginBottom: 32,
     },
-    optionButton: {
-        padding: 20,
-        borderRadius: 12,
+    genderOption: {
         borderWidth: 2,
+        borderRadius: 16,
+        padding: 20,
+        minHeight: 80,
     },
-    radioContainer: {
+    genderContent: {
         flexDirection: 'row',
         alignItems: 'center',
     },
-    radioOuter: {
-        width: 20,
-        height: 20,
-        borderRadius: 10,
-        borderWidth: 2,
-        marginRight: 16,
+    genderIcon: {
+        width: 48,
+        height: 48,
+        borderRadius: 24,
         justifyContent: 'center',
         alignItems: 'center',
+        marginRight: 16,
     },
-    radioInner: {
-        width: 10,
-        height: 10,
-        borderRadius: 5,
+    genderText: {
+        flex: 1,
     },
-    optionText: {
+    genderLabel: {
         fontSize: 16,
-        fontWeight: '500',
+        marginBottom: 4,
     },
-    continueButton: {
-        marginTop: 24,
+    genderDescription: {
+        fontSize: 14,
+        lineHeight: 20,
+    },
+    selectedIndicator: {
+        marginLeft: 8,
+    },
+    privacyContainer: {
+        marginTop: 16,
+        padding: 16,
+        borderRadius: 12,
+        backgroundColor: 'rgba(0, 0, 0, 0.02)',
+    },
+    privacyHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 8,
+        gap: 8,
+    },
+    privacyTitle: {
+        fontSize: 14,
+        fontWeight: '600',
+    },
+    privacyText: {
+        fontSize: 13,
+        lineHeight: 18,
     },
 });

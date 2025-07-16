@@ -2,164 +2,146 @@
 import { Ionicons } from '@expo/vector-icons';
 import React, { useState } from 'react';
 import {
+    StyleSheet,
     Text,
     TextInput,
+    TextInputProps,
     TextStyle,
     TouchableOpacity,
     View,
-    ViewStyle
+    ViewStyle,
 } from 'react-native';
 import { useThemeStore } from '../stores/themeStore';
 
-interface InputProps {
+interface InputProps extends Omit<TextInputProps, 'style'> {
     label?: string;
-    placeholder?: string;
-    value: string;
-    onChangeText: (text: string) => void;
-    secureTextEntry?: boolean;
-    keyboardType?: 'default' | 'email-address' | 'numeric' | 'phone-pad';
-    autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters';
     error?: string;
-    disabled?: boolean;
-    multiline?: boolean;
-    numberOfLines?: number;
-    style?: ViewStyle;
-    inputStyle?: TextStyle;
-    leftIcon?: keyof typeof Ionicons.glyphMap;
     rightIcon?: keyof typeof Ionicons.glyphMap;
     onRightIconPress?: () => void;
+    containerStyle?: ViewStyle;
+    inputStyle?: TextStyle;
+    style?: ViewStyle; // Este será o style do container do input
 }
 
 export const Input: React.FC<InputProps> = ({
     label,
-    placeholder,
-    value,
-    onChangeText,
-    secureTextEntry = false,
-    keyboardType = 'default',
-    autoCapitalize = 'sentences',
     error,
-    disabled = false,
-    multiline = false,
-    numberOfLines = 1,
-    style,
-    inputStyle,
-    leftIcon,
     rightIcon,
     onRightIconPress,
+    containerStyle,
+    inputStyle,
+    style,
+    secureTextEntry,
+    ...props
 }) => {
     const { theme } = useThemeStore();
+    const [isPasswordVisible, setIsPasswordVisible] = useState(false);
     const [isFocused, setIsFocused] = useState(false);
-    const [isSecureVisible, setIsSecureVisible] = useState(false);
 
-    const containerStyle: ViewStyle = {
-        marginVertical: theme.spacing.sm,
-    };
+    const isPassword = secureTextEntry;
+    const showPassword = isPassword && !isPasswordVisible;
 
-    const labelStyle: TextStyle = {
-        fontSize: theme.typography.fontSizes.sm,
-        fontWeight: theme.typography.fontWeights.medium,
-        color: theme.colors.text,
-        marginBottom: theme.spacing.xs,
-    };
-
-    const inputContainerStyle: ViewStyle = {
-        flexDirection: 'row',
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: error
-            ? theme.colors.error
-            : isFocused
-                ? theme.colors.primary
-                : theme.colors.border,
-        borderRadius: theme.borderRadius.md,
-        backgroundColor: theme.colors.surface,
-        paddingHorizontal: theme.spacing.md,
-        minHeight: 48,
-    };
-
-    const textInputStyle: TextStyle = {
-        flex: 1,
-        fontSize: theme.typography.fontSizes.md,
-        color: theme.colors.text,
-        paddingVertical: theme.spacing.sm,
-    };
-
-    const errorStyle: TextStyle = {
-        fontSize: theme.typography.fontSizes.xs,
-        color: theme.colors.error,
-        marginTop: theme.spacing.xs,
-    };
-
-    const iconStyle = {
-        marginHorizontal: theme.spacing.xs,
-    };
-
-    const renderRightIcon = () => {
-        if (secureTextEntry) {
-            return (
-                <TouchableOpacity
-                    onPress={() => setIsSecureVisible(!isSecureVisible)}
-                    style={iconStyle}
-                >
-                    <Ionicons
-                        name={isSecureVisible ? 'eye-off' : 'eye'}
-                        size={20}
-                        color={theme.colors.textSecondary}
-                    />
-                </TouchableOpacity>
-            );
+    const handleRightIconPress = () => {
+        if (isPassword) {
+            setIsPasswordVisible(!isPasswordVisible);
+        } else if (onRightIconPress) {
+            onRightIconPress();
         }
+    };
 
-        if (rightIcon) {
-            return (
-                <TouchableOpacity onPress={onRightIconPress} style={iconStyle}>
-                    <Ionicons
-                        name={rightIcon}
-                        size={20}
-                        color={theme.colors.textSecondary}
-                    />
-                </TouchableOpacity>
-            );
+    const getRightIcon = () => {
+        if (isPassword) {
+            return isPasswordVisible ? 'eye-off' : 'eye';
         }
-
-        return null;
+        return rightIcon;
     };
 
     return (
-        <View style={[containerStyle, style]}>
-            {label && <Text style={labelStyle}>{label}</Text>}
+        <View style={[styles.container, containerStyle]}>
+            {label && (
+                <Text style={[styles.label, { color: theme.colors.text }]}>
+                    {label}
+                </Text>
+            )}
 
-            <View style={inputContainerStyle}>
-                {leftIcon && (
-                    <Ionicons
-                        name={leftIcon}
-                        size={20}
-                        color={theme.colors.textSecondary}
-                        style={iconStyle}
-                    />
-                )}
-
+            <View style={[
+                styles.inputContainer,
+                {
+                    borderColor: error
+                        ? theme.colors.error
+                        : isFocused
+                            ? theme.colors.primary
+                            : theme.colors.border,
+                    backgroundColor: theme.colors.surface,
+                },
+                style
+            ]}>
                 <TextInput
-                    style={[textInputStyle, inputStyle]}
-                    placeholder={placeholder}
+                    style={[
+                        styles.input,
+                        {
+                            color: theme.colors.text,
+                            flex: 1,
+                        },
+                        inputStyle
+                    ]}
                     placeholderTextColor={theme.colors.textSecondary}
-                    value={value}
-                    onChangeText={onChangeText}
-                    secureTextEntry={secureTextEntry && !isSecureVisible}
-                    keyboardType={keyboardType}
-                    autoCapitalize={autoCapitalize}
-                    editable={!disabled}
-                    multiline={multiline}
-                    numberOfLines={numberOfLines}
+                    secureTextEntry={showPassword}
                     onFocus={() => setIsFocused(true)}
                     onBlur={() => setIsFocused(false)}
+                    {...props}
                 />
 
-                {renderRightIcon()}
+                {(rightIcon || isPassword) && (
+                    <TouchableOpacity
+                        onPress={handleRightIconPress}
+                        style={styles.rightIcon}
+                    >
+                        <Ionicons
+                            name={getRightIcon()!}
+                            size={20}
+                            color={theme.colors.textSecondary}
+                        />
+                    </TouchableOpacity>
+                )}
             </View>
 
-            {error && <Text style={errorStyle}>{error}</Text>}
+            {error && (
+                <Text style={[styles.errorText, { color: theme.colors.error }]}>
+                    {error}
+                </Text>
+            )}
         </View>
     );
 };
+
+const styles = StyleSheet.create({
+    container: {
+        marginVertical: 8,
+    },
+    label: {
+        fontSize: 14,
+        fontWeight: '500',
+        marginBottom: 4,
+    },
+    inputContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderRadius: 8,
+        paddingHorizontal: 16,
+        minHeight: 48,
+    },
+    input: {
+        fontSize: 16,
+        paddingVertical: 12,
+    },
+    rightIcon: {
+        padding: 4,
+        marginLeft: 8,
+    },
+    errorText: {
+        fontSize: 12,
+        marginTop: 4,
+    },
+});

@@ -20,17 +20,17 @@ export default function OnboardingAge() {
         const numericAge = parseInt(age);
 
         if (!age.trim()) {
-            Alert.alert('Error', 'Please enter your age');
+            Alert.alert('Erro', 'Por favor, insira sua idade');
             return;
         }
 
         if (isNaN(numericAge) || numericAge < 1 || numericAge > 120) {
-            Alert.alert('Error', 'Please enter a valid age between 1 and 120');
+            Alert.alert('Erro', 'Insira uma idade válida entre 1 e 120');
             return;
         }
 
         if (numericAge < 13) {
-            Alert.alert('Age Restriction', 'You must be at least 13 years old to use this app');
+            Alert.alert('Restrição de Idade', 'Você deve ter pelo menos 13 anos para usar este aplicativo');
             return;
         }
 
@@ -55,8 +55,8 @@ export default function OnboardingAge() {
     return (
         <TouchableWithoutFeedback onPress={dismissKeyboard}>
             <OnboardingLayout
-                title="How Old Are You? 🎂"
-                subtitle="This helps us recommend age-appropriate content for you"
+                title="Quantos anos você tem? 🎂"
+                subtitle="Isso nos ajuda a recomendar conteúdos adequados para sua idade"
                 progressWidth="50%"
                 onContinue={handleContinue}
                 onSkip={handleSkip}
@@ -64,10 +64,10 @@ export default function OnboardingAge() {
             >
                 <View style={styles.inputContainer}>
                     <Input
-                        label="Your Age"
+                        label="Sua idade"
                         value={age}
                         onChangeText={setAge}
-                        placeholder="Enter your age"
+                        placeholder="Digite sua idade"
                         keyboardType="numeric"
                         maxLength={3}
                         returnKeyType="done"
@@ -82,14 +82,14 @@ export default function OnboardingAge() {
                             color={theme.colors.textSecondary}
                         />
                         <Text style={[styles.infoText, { color: theme.colors.textSecondary }]}>
-                            You must be at least 13 years old to use this app
+                            Você deve ter pelo menos 13 anos para usar este aplicativo
                         </Text>
                     </View>
                 </View>
 
                 <View style={styles.benefitsContainer}>
                     <Text style={[styles.benefitsTitle, { color: theme.colors.text }]}>
-                        Why we ask for your age:
+                        Por que pedimos sua idade:
                     </Text>
 
                     <View style={styles.benefitItem}>
@@ -97,7 +97,7 @@ export default function OnboardingAge() {
                             <Ionicons name="book" size={16} color={theme.colors.white} />
                         </View>
                         <Text style={[styles.benefitText, { color: theme.colors.textSecondary }]}>
-                            Age-appropriate book recommendations
+                            Recomendações de livros adequados para sua idade
                         </Text>
                     </View>
 
@@ -106,7 +106,7 @@ export default function OnboardingAge() {
                             <Ionicons name="shield-checkmark" size={16} color={theme.colors.white} />
                         </View>
                         <Text style={[styles.benefitText, { color: theme.colors.textSecondary }]}>
-                            Content filtering and safety
+                            Filtro de conteúdo e segurança
                         </Text>
                     </View>
 
@@ -115,7 +115,7 @@ export default function OnboardingAge() {
                             <Ionicons name="trending-up" size={16} color={theme.colors.white} />
                         </View>
                         <Text style={[styles.benefitText, { color: theme.colors.textSecondary }]}>
-                            Personalized reading experience
+                            Experiência de leitura personalizada
                         </Text>
                     </View>
                 </View>

@@ -16,7 +16,7 @@ export default function OnboardingProfile() {
         setUser,
         setToken,
         completeOnboarding,
-        tempUserData,  // Dados temporários coletados no onboarding
+        tempUserData,
         clearTempData
     } = useUserStore();
 
@@ -27,7 +27,7 @@ export default function OnboardingProfile() {
         email: '',
         phoneNumber: '',
         dateOfBirth: '',
-        country: 'United States',
+        country: 'Brasil',
         password: '',
         confirmPassword: '',
     });
@@ -42,13 +42,13 @@ export default function OnboardingProfile() {
         }
 
         if (!formData.email.trim()) {
-            Alert.alert('Erro', 'Por favor, digite seu email');
+            Alert.alert('Erro', 'Por favor, digite seu e-mail');
             return false;
         }
 
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(formData.email)) {
-            Alert.alert('Erro', 'Por favor, digite um email válido');
+            Alert.alert('Erro', 'Por favor, digite um e-mail válido');
             return false;
         }
 
@@ -81,7 +81,6 @@ export default function OnboardingProfile() {
         setRegistering(true);
 
         try {
-            // Calcular idade a partir da data de nascimento
             const birthDate = new Date(formData.dateOfBirth);
             const today = new Date();
             let age = today.getFullYear() - birthDate.getFullYear();
@@ -90,7 +89,6 @@ export default function OnboardingProfile() {
                 age--;
             }
 
-            // Combinar dados do formulário com dados temporários do onboarding
             const registerData = {
                 name: formData.fullName.trim(),
                 email: formData.email.trim().toLowerCase(),
@@ -108,12 +106,10 @@ export default function OnboardingProfile() {
 
             console.log('Dados enviados para API:', registerData);
 
-            // Chamar API para registrar usuário
             const response = await apiService.register(registerData);
 
             console.log('Resposta da API:', response);
 
-            // Criar objeto User local a partir da resposta da API
             const newUser = {
                 id: response.userRegister.id,
                 fullName: response.userRegister.name,
@@ -130,11 +126,10 @@ export default function OnboardingProfile() {
                 emailVerified: response.userRegister.emailVerified
             };
 
-            // Atualizar estado do usuário
             setUser(newUser);
             setToken(response.token);
             completeOnboarding();
-            clearTempData(); // Limpar dados temporários
+            clearTempData();
 
             Alert.alert(
                 'Sucesso!',
@@ -156,28 +151,27 @@ export default function OnboardingProfile() {
         }
     };
 
-    // Função para mapear gêneros favoritos para boolean preferences
     const mapGenresToPreferences = (favoriteGenres: string[]) => {
         const genreMap = {
             'Romance': 'romance',
-            'Fantasy': 'fantasy',
-            'Sci-Fi': 'sciFi',
-            'Horror': 'horror',
-            'Mystery': 'mystery',
-            'Thriller': 'thriller',
-            'Psychology': 'psychology',
-            'Inspiration': 'inspiration',
-            'Comedy': 'comedy',
-            'Action': 'action',
-            'Adventure': 'adventure',
-            'Comics': 'comics',
-            "Children's": 'childrens',
-            'Art & Photography': 'art',
-            'Food & Drink': 'food',
-            'Biography': 'biography',
-            'Science & Technology': 'science',
-            'Guide / How-to': 'howto',
-            'Travel': 'travel'
+            'Fantasia': 'fantasy',
+            'Ficção Científica': 'sciFi',
+            'Terror': 'horror',
+            'Mistério': 'mystery',
+            'Suspense': 'thriller',
+            'Psicologia': 'psychology',
+            'Inspiração': 'inspiration',
+            'Comédia': 'comedy',
+            'Ação': 'action',
+            'Aventura': 'adventure',
+            'Quadrinhos': 'comics',
+            "Infantil": 'childrens',
+            'Arte & Fotografia': 'art',
+            'Culinária & Bebidas': 'food',
+            'Biografia': 'biography',
+            'Ciência & Tecnologia': 'science',
+            'Guias / Como Fazer': 'howto',
+            'Viagem': 'travel'
         } as const;
 
         const preferences = {
@@ -258,10 +252,10 @@ export default function OnboardingProfile() {
                 />
 
                 <Input
-                    label="Email"
+                    label="E-mail"
                     value={formData.email}
                     onChangeText={(text) => setFormData(prev => ({ ...prev, email: text }))}
-                    placeholder="Digite seu email"
+                    placeholder="Digite seu e-mail"
                     keyboardType="email-address"
                     autoCapitalize="none"
                 />
@@ -278,7 +272,7 @@ export default function OnboardingProfile() {
                     label="Data de Nascimento"
                     value={formData.dateOfBirth}
                     onChangeText={(text) => setFormData(prev => ({ ...prev, dateOfBirth: text }))}
-                    placeholder="YYYY-MM-DD"
+                    placeholder="AAAA-MM-DD"
                     rightIcon="calendar"
                 />
 

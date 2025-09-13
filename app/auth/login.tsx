@@ -2,11 +2,10 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Button } from '../../components/Button';
 import { Input } from '../../components/Input';
 import { Layout } from '../../components/Layout';
-import { API_CONFIG } from '../../constants/config';
 import { useThemeStore } from '../../stores/themeStore';
 import { useUserStore } from '../../stores/userStore';
 
@@ -27,30 +26,18 @@ export default function LoginScreen() {
 
     const handleLogin = async () => {
         if (!formData.email.trim() || !formData.password.trim()) {
-            Alert.alert('Error', 'Please fill in all fields');
+            Alert.alert('Erro', 'Por favor, preencha todos os campos');
             return;
         }
-
-        // 🔍 DEBUG - Remova depois que funcionar
-        console.log('🔐 Tentando fazer login...');
-        console.log('📧 Email:', formData.email);
-        console.log('🔑 Password length:', formData.password.length);
-        console.log('🌐 API URL:', API_CONFIG.BASE_URL);
 
         clearError();
 
         const success = await login(formData.email.trim(), formData.password);
 
-        // 🔍 DEBUG - Remova depois que funcionar
-        console.log('✅ Login success:', success);
-        console.log('❌ Login error:', error);
-
         if (success) {
-            console.log('🎉 Login bem-sucedido! Redirecionando...');
             router.replace('/(tabs)');
         } else if (error) {
-            console.log('💥 Erro no login:', error);
-            Alert.alert('Error', error);
+            Alert.alert('Erro', error);
         }
     };
 
@@ -59,12 +46,20 @@ export default function LoginScreen() {
     };
 
     const handleSocialLogin = (provider: string) => {
-        Alert.alert('Social Login', `${provider} login will be implemented`);
+        Alert.alert('Login Social', `Login com ${provider} ainda será implementado`);
     };
 
     return (
         <Layout scrollable={true}>
             <View style={styles.container}>
+                {/* Overlay de Loading */}
+                <Modal transparent visible={loading} animationType="fade">
+                    <View style={styles.overlay}>
+                        <ActivityIndicator size="large" color={theme.colors.primary} />
+                        <Text style={styles.loadingText}>Entrando na sua conta...</Text>
+                    </View>
+                </Modal>
+
                 {/* Header */}
                 <TouchableOpacity onPress={handleBack} style={styles.backButton}>
                     <Ionicons
@@ -78,29 +73,29 @@ export default function LoginScreen() {
                 <View style={styles.content}>
                     <View style={styles.titleContainer}>
                         <Text style={[styles.title, { color: theme.colors.text }]}>
-                            Hello there 👋
+                            Olá 👋
                         </Text>
                         <Text style={[styles.subtitle, { color: theme.colors.textSecondary }]}>
-                            Please enter your username/email and password to sign in.
+                            Digite seu e-mail/usuário e senha para acessar sua conta.
                         </Text>
                     </View>
 
                     {/* Form */}
                     <View style={styles.form}>
                         <Input
-                            label="Username / Email"
+                            label="Usuário / Email"
                             value={formData.email}
                             onChangeText={(text) => setFormData(prev => ({ ...prev, email: text }))}
-                            placeholder="Enter your email"
+                            placeholder="Digite seu e-mail"
                             keyboardType="email-address"
                             autoCapitalize="none"
                         />
 
                         <Input
-                            label="Password"
+                            label="Senha"
                             value={formData.password}
                             onChangeText={(text) => setFormData(prev => ({ ...prev, password: text }))}
-                            placeholder="Enter your password"
+                            placeholder="Digite sua senha"
                             secureTextEntry
                             rightIcon="eye"
                         />
@@ -126,14 +121,14 @@ export default function LoginScreen() {
                                 )}
                             </View>
                             <Text style={[styles.rememberMeText, { color: theme.colors.text }]}>
-                                Remember me
+                                Lembrar-me
                             </Text>
                         </TouchableOpacity>
 
                         {/* Forgot Password */}
                         <TouchableOpacity onPress={handleForgotPassword}>
                             <Text style={[styles.forgotPassword, { color: theme.colors.primary }]}>
-                                Forgot Password
+                                Esqueceu sua senha?
                             </Text>
                         </TouchableOpacity>
                     </View>
@@ -143,7 +138,7 @@ export default function LoginScreen() {
                 <View style={styles.buttonContainer}>
                     {/* Social Login */}
                     <Text style={[styles.orText, { color: theme.colors.textSecondary }]}>
-                        or continue with
+                        ou entre com
                     </Text>
 
                     <View style={styles.socialContainer}>
@@ -170,7 +165,7 @@ export default function LoginScreen() {
                     </View>
 
                     <Button
-                        title="Sign In"
+                        title="Entrar"
                         onPress={handleLogin}
                         loading={loading}
                         style={styles.signInButton}
@@ -183,7 +178,7 @@ export default function LoginScreen() {
                         </Text>
                         <TouchableOpacity onPress={() => router.push('/onboarding')}>
                             <Text style={[styles.registerLink, { color: theme.colors.primary }]}>
-                                Criar Conta
+                                Criar conta
                             </Text>
                         </TouchableOpacity>
                     </View>
@@ -196,6 +191,18 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+    },
+    overlay: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0,0,0,0.4)',
+    },
+    loadingText: {
+        marginTop: 16,
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: '500',
     },
     backButton: {
         alignSelf: 'flex-start',

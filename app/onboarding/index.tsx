@@ -16,7 +16,7 @@ export default function OnboardingWelcome() {
 
     const handleContinueWithGoogle = () => {
         // Implementar login com Google
-        console.log('Continue with Google');
+        console.log('Continuar com Google');
     };
 
     const handleAlreadyHaveAccount = () => {
@@ -26,26 +26,26 @@ export default function OnboardingWelcome() {
     return (
         <Layout>
             <View style={styles.container}>
-                {/* Header Image */}
+                {/* Imagem do cabeçalho */}
                 <View style={styles.imageContainer}>
                     <View style={[styles.bookshelfPlaceholder, { backgroundColor: theme.colors.surface }]}>
                         <Text style={[styles.imagePlaceholderText, { color: theme.colors.textSecondary }]}>
-                            📚 Bookshelf Image
+                            📚 Imagem da Estante
                         </Text>
                     </View>
                 </View>
 
-                {/* Content */}
+                {/* Conteúdo */}
                 <View style={styles.content}>
                     <Text style={[styles.title, { color: theme.colors.text }]}>
-                        Welcome to <Text style={{ color: theme.colors.primary }}>FicHead</Text> 👋
+                        Bem-vindo ao <Text style={{ color: theme.colors.primary }}>FicHead</Text> 👋
                     </Text>
 
                     <Text style={[styles.subtitle, { color: theme.colors.textSecondary }]}>
-                        The Number One Best Ebook Store & Reader Application in this Century
+                        A melhor loja e aplicativo de ebooks deste século
                     </Text>
 
-                    {/* Progress Indicator */}
+                    {/* Indicador de progresso */}
                     <View style={styles.progressContainer}>
                         <View style={[styles.progressDot, { backgroundColor: theme.colors.primary }]} />
                         <View style={[styles.progressDot, { backgroundColor: theme.colors.border }]} />
@@ -54,23 +54,23 @@ export default function OnboardingWelcome() {
                     </View>
                 </View>
 
-                {/* Buttons */}
+                {/* Botões */}
                 <View style={styles.buttonContainer}>
                     <Button
-                        title="Continue with Google"
+                        title="Continuar com Google"
                         onPress={handleContinueWithGoogle}
                         variant="outline"
                         style={styles.googleButton}
                     />
 
                     <Button
-                        title="Get Started"
+                        title="Começar Agora"
                         onPress={handleGetStarted}
                         style={styles.getStartedButton}
                     />
 
                     <Button
-                        title="I Already Have an Account"
+                        title="Já Tenho Uma Conta"
                         onPress={handleAlreadyHaveAccount}
                         variant="ghost"
                         style={styles.loginButton}
@@ -140,6 +140,6 @@ const styles = StyleSheet.create({
         marginBottom: 8,
     },
     loginButton: {
-        // Login button styles
+        // Estilos do botão de login
     },
 });

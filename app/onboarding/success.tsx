@@ -26,7 +26,7 @@ export default function OnboardingSuccess() {
         <Layout>
             <View style={styles.container}>
                 <View style={styles.content}>
-                    {/* Success Icon */}
+                    {/* Ícone de Sucesso */}
                     <View style={[styles.iconContainer, { backgroundColor: theme.colors.primary }]}>
                         <View style={[styles.iconBackground, { backgroundColor: theme.colors.white }]}>
                             <Ionicons
@@ -35,26 +35,26 @@ export default function OnboardingSuccess() {
                                 color={theme.colors.primary}
                             />
                         </View>
-                        {/* Decorative dots */}
+                        {/* Pontinhos decorativos */}
                         <View style={[styles.dot, styles.dot1, { backgroundColor: theme.colors.primary }]} />
                         <View style={[styles.dot, styles.dot2, { backgroundColor: theme.colors.primary }]} />
                         <View style={[styles.dot, styles.dot3, { backgroundColor: theme.colors.primary }]} />
                         <View style={[styles.dot, styles.dot4, { backgroundColor: theme.colors.primary }]} />
                     </View>
 
-                    {/* Success Message */}
+                    {/* Mensagem de Sucesso */}
                     <Text style={[styles.title, { color: theme.colors.primary }]}>
-                        Sign Up Successful!
+                        Cadastro Realizado com Sucesso!
                     </Text>
 
                     <Text style={[styles.subtitle, { color: theme.colors.text }]}>
-                        Your account has been created.{'\n'}
-                        Please wait a moment, we are{'\n'}
-                        preparing for you...
+                        Sua conta foi criada.{'\n'}
+                        Aguarde um momento, estamos{'\n'}
+                        preparando tudo para você...
                     </Text>
                 </View>
 
-                {/* Loading Animation */}
+                {/* Animação de Carregamento */}
                 <LoadingDots />
             </View>
         </Layout>

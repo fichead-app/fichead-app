@@ -19,21 +19,21 @@ interface GenderOption {
 const genderOptions: GenderOption[] = [
     {
         value: 'male',
-        label: 'Male',
+        label: 'Masculino',
         icon: 'male',
-        description: 'I identify as male'
+        description: 'Eu me identifico como masculino'
     },
     {
         value: 'female',
-        label: 'Female',
+        label: 'Feminino',
         icon: 'female',
-        description: 'I identify as female'
+        description: 'Eu me identifico como feminino'
     },
     {
         value: 'not_specified',
-        label: 'Prefer not to say',
+        label: 'Prefiro não informar',
         icon: 'person',
-        description: 'I prefer not to specify'
+        description: 'Prefiro não especificar'
     }
 ];
 
@@ -63,8 +63,8 @@ export default function OnboardingGender() {
 
     return (
         <OnboardingLayout
-            title="What's Your Gender? 👤"
-            subtitle="This helps us personalize your experience and recommend content that matches your preferences"
+            title="Qual é o seu gênero? 👤"
+            subtitle="Isso nos ajuda a personalizar sua experiência e recomendar conteúdos de acordo com suas preferências"
             progressWidth="25%"
             onContinue={handleContinue}
             onSkip={handleSkip}
@@ -141,7 +141,7 @@ export default function OnboardingGender() {
                 ))}
             </View>
 
-            {/* Privacy Info */}
+            {/* Informações de Privacidade */}
             <View style={styles.privacyContainer}>
                 <View style={styles.privacyHeader}>
                     <Ionicons
@@ -150,11 +150,11 @@ export default function OnboardingGender() {
                         color={theme.colors.textSecondary}
                     />
                     <Text style={[styles.privacyTitle, { color: theme.colors.text }]}>
-                        Privacy Notice
+                        Aviso de Privacidade
                     </Text>
                 </View>
                 <Text style={[styles.privacyText, { color: theme.colors.textSecondary }]}>
-                    Your gender information is kept private and secure. We use this data only to improve your personalized experience and will never share it with third parties.
+                    As informações sobre seu gênero são mantidas privadas e seguras. Usamos esses dados apenas para melhorar sua experiência personalizada e nunca os compartilharemos com terceiros.
                 </Text>
             </View>
         </OnboardingLayout>

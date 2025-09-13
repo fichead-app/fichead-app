@@ -7,10 +7,10 @@ import { useThemeStore } from '../../stores/themeStore';
 import { useUserStore } from '../../stores/userStore';
 
 const genres = [
-    'Romance', 'Fantasy', 'Sci-Fi', 'Horror', 'Mystery', 'Thriller',
-    'Psychology', 'Inspiration', 'Comedy', 'Action', 'Adventure',
-    'Comics', 'Children\'s', 'Art & Photography', 'Food & Drink',
-    'Biography', 'Science & Technology', 'Guide / How-to', 'Travel'
+    'Romance', 'Fantasia', 'Ficção Científica', 'Terror', 'Mistério', 'Suspense',
+    'Psicologia', 'Inspiração', 'Comédia', 'Ação', 'Aventura',
+    'Quadrinhos', 'Infantil', 'Arte & Fotografia', 'Comida & Bebida',
+    'Biografia', 'Ciência & Tecnologia', 'Guia / How-to', 'Viagem'
 ];
 
 export default function OnboardingGenres() {
@@ -41,8 +41,8 @@ export default function OnboardingGenres() {
 
     return (
         <OnboardingLayout
-            title="Choose the Book Genre You Like ❤️"
-            subtitle="Select your preferred book genres for better recommendations, or you can skip it"
+            title="Escolha os Gêneros Literários que Você Gosta ❤️"
+            subtitle="Selecione seus gêneros preferidos para receber recomendações melhores, ou você pode pular esta etapa"
             progressWidth="75%"
             onContinue={handleContinue}
             onSkip={handleSkip}
@@ -84,7 +84,7 @@ export default function OnboardingGenres() {
             {/* Info sobre seleção múltipla */}
             <View style={styles.infoContainer}>
                 <Text style={[styles.infoText, { color: theme.colors.textSecondary }]}>
-                    Selected: {selectedGenres.length} genre{selectedGenres.length !== 1 ? 's' : ''}
+                    Selecionado: {selectedGenres.length} gênero{selectedGenres.length !== 1 ? 's' : ''}
                     {selectedGenres.length > 0 && ` (${selectedGenres.join(', ')})`}
                 </Text>
             </View>

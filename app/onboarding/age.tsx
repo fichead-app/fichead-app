@@ -1,4 +1,4 @@
-// app/onboarding/age.tsx - Usando OnboardingLayout
+// app/onboarding/age.tsx - Usando dados temporários
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
@@ -11,8 +11,8 @@ import { useUserStore } from '../../stores/userStore';
 export default function OnboardingAge() {
     const router = useRouter();
     const { theme } = useThemeStore();
-    const { updateUser } = useUserStore();
-    const [age, setAge] = useState('');
+    const { tempUserData, updateTempUserData } = useUserStore();
+    const [age, setAge] = useState(tempUserData?.age?.toString() || '');
 
     const handleContinue = () => {
         Keyboard.dismiss();
@@ -34,7 +34,7 @@ export default function OnboardingAge() {
             return;
         }
 
-        updateUser({ age: numericAge });
+        updateTempUserData({ age: numericAge });
 
         setTimeout(() => {
             router.push('/onboarding/genres');

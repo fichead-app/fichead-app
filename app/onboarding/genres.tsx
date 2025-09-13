@@ -1,4 +1,4 @@
-// app/onboarding/genres.tsx - Usando OnboardingLayout
+// app/onboarding/genres.tsx - Usando dados temporários
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -16,16 +16,18 @@ const genres = [
 export default function OnboardingGenres() {
     const router = useRouter();
     const { theme } = useThemeStore();
-    const { updateUser } = useUserStore();
-    const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
+    const { tempUserData, updateTempUserData } = useUserStore();
+    const [selectedGenres, setSelectedGenres] = useState<string[]>(
+        tempUserData?.favoriteGenres || []
+    );
 
     const handleContinue = () => {
-        updateUser({ favoriteGenres: selectedGenres });
+        updateTempUserData({ favoriteGenres: selectedGenres });
         router.push('/onboarding/profile');
     };
 
     const handleSkip = () => {
-        updateUser({ favoriteGenres: [] });
+        updateTempUserData({ favoriteGenres: [] });
         router.push('/onboarding/profile');
     };
 
@@ -40,12 +42,12 @@ export default function OnboardingGenres() {
     return (
         <OnboardingLayout
             title="Choose the Book Genre You Like ❤️"
-            subtitle="Select your preferred book genre for better recommendations, or you can skip it"
+            subtitle="Select your preferred book genres for better recommendations, or you can skip it"
             progressWidth="75%"
             onContinue={handleContinue}
             onSkip={handleSkip}
             showSkip={true}
-            continueDisabled={selectedGenres.length === 0}
+            continueDisabled={false} // Permite continuar mesmo sem seleção
         >
             <View style={styles.genresGrid}>
                 {genres.map((genre) => (
@@ -78,6 +80,14 @@ export default function OnboardingGenres() {
                     </TouchableOpacity>
                 ))}
             </View>
+
+            {/* Info sobre seleção múltipla */}
+            <View style={styles.infoContainer}>
+                <Text style={[styles.infoText, { color: theme.colors.textSecondary }]}>
+                    Selected: {selectedGenres.length} genre{selectedGenres.length !== 1 ? 's' : ''}
+                    {selectedGenres.length > 0 && ` (${selectedGenres.join(', ')})`}
+                </Text>
+            </View>
         </OnboardingLayout>
     );
 }
@@ -87,6 +97,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         flexWrap: 'wrap',
         gap: 12,
+        marginBottom: 24,
     },
     genreButton: {
         paddingVertical: 12,
@@ -97,6 +108,17 @@ const styles = StyleSheet.create({
     },
     genreText: {
         fontSize: 14,
+        textAlign: 'center',
+    },
+    infoContainer: {
+        marginTop: 16,
+        padding: 12,
+        backgroundColor: 'rgba(0, 0, 0, 0.02)',
+        borderRadius: 8,
+        alignItems: 'center',
+    },
+    infoText: {
+        fontSize: 12,
         textAlign: 'center',
     },
 });

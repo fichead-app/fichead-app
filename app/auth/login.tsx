@@ -6,20 +6,20 @@ import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Button } from '../../components/Button';
 import { Input } from '../../components/Input';
 import { Layout } from '../../components/Layout';
+import { API_CONFIG } from '../../constants/config';
 import { useThemeStore } from '../../stores/themeStore';
 import { useUserStore } from '../../stores/userStore';
 
 export default function LoginScreen() {
     const router = useRouter();
     const { theme } = useThemeStore();
-    const { login } = useUserStore();
+    const { login, loading, error, clearError } = useUserStore();
 
     const [formData, setFormData] = useState({
-        email: 'andrew.ainsley@yourdomain.com',
-        password: '••••••••••••',
+        email: '',
+        password: '',
     });
     const [rememberMe, setRememberMe] = useState(true);
-    const [loading, setLoading] = useState(false);
 
     const handleBack = () => {
         router.back();
@@ -31,19 +31,26 @@ export default function LoginScreen() {
             return;
         }
 
-        setLoading(true);
+        // 🔍 DEBUG - Remova depois que funcionar
+        console.log('🔐 Tentando fazer login...');
+        console.log('📧 Email:', formData.email);
+        console.log('🔑 Password length:', formData.password.length);
+        console.log('🌐 API URL:', API_CONFIG.BASE_URL);
 
-        try {
-            const success = await login(formData.email, formData.password);
-            if (success) {
-                router.replace('/(tabs)');
-            } else {
-                Alert.alert('Error', 'Invalid credentials');
-            }
-        } catch (error) {
-            Alert.alert('Error', 'Something went wrong');
-        } finally {
-            setLoading(false);
+        clearError();
+
+        const success = await login(formData.email.trim(), formData.password);
+
+        // 🔍 DEBUG - Remova depois que funcionar
+        console.log('✅ Login success:', success);
+        console.log('❌ Login error:', error);
+
+        if (success) {
+            console.log('🎉 Login bem-sucedido! Redirecionando...');
+            router.replace('/(tabs)');
+        } else if (error) {
+            console.log('💥 Erro no login:', error);
+            Alert.alert('Error', error);
         }
     };
 
@@ -56,7 +63,7 @@ export default function LoginScreen() {
     };
 
     return (
-        <Layout>
+        <Layout scrollable={true}>
             <View style={styles.container}>
                 {/* Header */}
                 <TouchableOpacity onPress={handleBack} style={styles.backButton}>
@@ -168,6 +175,18 @@ export default function LoginScreen() {
                         loading={loading}
                         style={styles.signInButton}
                     />
+
+                    {/* Register Link */}
+                    <View style={styles.registerContainer}>
+                        <Text style={[styles.registerText, { color: theme.colors.textSecondary }]}>
+                            Não tem uma conta?{' '}
+                        </Text>
+                        <TouchableOpacity onPress={() => router.push('/onboarding')}>
+                            <Text style={[styles.registerLink, { color: theme.colors.primary }]}>
+                                Criar Conta
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
             </View>
         </Layout>
@@ -253,5 +272,18 @@ const styles = StyleSheet.create({
     },
     signInButton: {
         marginTop: 8,
+    },
+    registerContainer: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 16,
+    },
+    registerText: {
+        fontSize: 16,
+    },
+    registerLink: {
+        fontSize: 16,
+        fontWeight: '600',
     },
 });

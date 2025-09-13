@@ -1,51 +1,230 @@
-// app/onboarding/profile.tsx - Usando OnboardingLayout
+// app/onboarding/profile.tsx - Coleta dados temporários e cria usuário
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Input } from '../../components/Input';
 import { OnboardingLayout } from '../../components/OnboardingLayout';
+import { apiService } from '../../services/api';
 import { useThemeStore } from '../../stores/themeStore';
 import { useUserStore } from '../../stores/userStore';
 
 export default function OnboardingProfile() {
     const router = useRouter();
     const { theme } = useThemeStore();
-    const { updateUser, user } = useUserStore();
+    const {
+        setUser,
+        setToken,
+        completeOnboarding,
+        tempUserData,  // Dados temporários coletados no onboarding
+        clearTempData
+    } = useUserStore();
+
+    const [registering, setRegistering] = useState(false);
 
     const [formData, setFormData] = useState({
-        fullName: user?.fullName || 'Andrew Ainsley',
-        phoneNumber: user?.phoneNumber || '+1-300-555-0399',
-        dateOfBirth: user?.dateOfBirth || '12/27/1995',
-        country: user?.country || 'United States',
+        fullName: '',
+        email: '',
+        phoneNumber: '',
+        dateOfBirth: '',
+        country: 'United States',
+        password: '',
+        confirmPassword: '',
     });
 
-    const handleContinue = () => {
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+    const validateForm = () => {
         if (!formData.fullName.trim()) {
-            Alert.alert('Error', 'Please enter your full name');
-            return;
+            Alert.alert('Erro', 'Por favor, digite seu nome completo');
+            return false;
         }
 
-        updateUser({
-            fullName: formData.fullName,
-            phoneNumber: formData.phoneNumber,
-            dateOfBirth: formData.dateOfBirth,
-            country: formData.country,
+        if (!formData.email.trim()) {
+            Alert.alert('Erro', 'Por favor, digite seu email');
+            return false;
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(formData.email)) {
+            Alert.alert('Erro', 'Por favor, digite um email válido');
+            return false;
+        }
+
+        if (!formData.dateOfBirth.trim()) {
+            Alert.alert('Erro', 'Por favor, digite sua data de nascimento');
+            return false;
+        }
+
+        if (!formData.password.trim()) {
+            Alert.alert('Erro', 'Por favor, digite uma senha');
+            return false;
+        }
+
+        if (formData.password.length < 6) {
+            Alert.alert('Erro', 'A senha deve ter pelo menos 6 caracteres');
+            return false;
+        }
+
+        if (formData.password !== formData.confirmPassword) {
+            Alert.alert('Erro', 'As senhas não coincidem');
+            return false;
+        }
+
+        return true;
+    };
+
+    const handleContinue = async () => {
+        if (!validateForm()) return;
+
+        setRegistering(true);
+
+        try {
+            // Calcular idade a partir da data de nascimento
+            const birthDate = new Date(formData.dateOfBirth);
+            const today = new Date();
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const monthDiff = today.getMonth() - birthDate.getMonth();
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
+            }
+
+            // Combinar dados do formulário com dados temporários do onboarding
+            const registerData = {
+                name: formData.fullName.trim(),
+                email: formData.email.trim().toLowerCase(),
+                userapp: formData.fullName.toLowerCase().replace(/\s+/g, ''),
+                password: formData.password,
+                dateBirth: formData.dateOfBirth,
+                avatarUrl: '',
+                age: age,
+                onboardCompleted: true,
+                emailVerified: false,
+                genre: tempUserData?.gender === 'male' ? 'male' :
+                    tempUserData?.gender === 'female' ? 'female' : 'empty',
+                userStylePreferences: mapGenresToPreferences(tempUserData?.favoriteGenres || [])
+            };
+
+            console.log('Dados enviados para API:', registerData);
+
+            // Chamar API para registrar usuário
+            const response = await apiService.register(registerData);
+
+            console.log('Resposta da API:', response);
+
+            // Criar objeto User local a partir da resposta da API
+            const newUser = {
+                id: response.userRegister.id,
+                fullName: response.userRegister.name,
+                email: response.userRegister.email,
+                phoneNumber: formData.phoneNumber,
+                dateOfBirth: formData.dateOfBirth,
+                country: formData.country,
+                gender: tempUserData?.gender || 'not_specified',
+                age: response.userRegister.age,
+                favoriteGenres: tempUserData?.favoriteGenres || [],
+                avatar: response.userRegister.avatarUrl || undefined,
+                userapp: response.userRegister.userapp,
+                onboardingCompleted: true,
+                emailVerified: response.userRegister.emailVerified
+            };
+
+            // Atualizar estado do usuário
+            setUser(newUser);
+            setToken(response.token);
+            completeOnboarding();
+            clearTempData(); // Limpar dados temporários
+
+            Alert.alert(
+                'Sucesso!',
+                'Sua conta foi criada com sucesso!',
+                [{
+                    text: 'OK',
+                    onPress: () => router.push('/onboarding/success')
+                }]
+            );
+
+        } catch (error) {
+            console.error('Erro ao registrar usuário:', error);
+            Alert.alert(
+                'Erro',
+                error instanceof Error ? error.message : 'Erro ao criar conta. Tente novamente.'
+            );
+        } finally {
+            setRegistering(false);
+        }
+    };
+
+    // Função para mapear gêneros favoritos para boolean preferences
+    const mapGenresToPreferences = (favoriteGenres: string[]) => {
+        const genreMap = {
+            'Romance': 'romance',
+            'Fantasy': 'fantasy',
+            'Sci-Fi': 'sciFi',
+            'Horror': 'horror',
+            'Mystery': 'mystery',
+            'Thriller': 'thriller',
+            'Psychology': 'psychology',
+            'Inspiration': 'inspiration',
+            'Comedy': 'comedy',
+            'Action': 'action',
+            'Adventure': 'adventure',
+            'Comics': 'comics',
+            "Children's": 'childrens',
+            'Art & Photography': 'art',
+            'Food & Drink': 'food',
+            'Biography': 'biography',
+            'Science & Technology': 'science',
+            'Guide / How-to': 'howto',
+            'Travel': 'travel'
+        } as const;
+
+        const preferences = {
+            romance: false,
+            fantasy: false,
+            sciFi: false,
+            horror: false,
+            mystery: false,
+            thriller: false,
+            psychology: false,
+            inspiration: false,
+            comedy: false,
+            action: false,
+            adventure: false,
+            comics: false,
+            childrens: false,
+            art: false,
+            food: false,
+            biography: false,
+            science: false,
+            technology: false,
+            howto: false,
+            travel: false,
+            epicfantasy: false
+        };
+
+        favoriteGenres.forEach(genre => {
+            const key = genreMap[genre as keyof typeof genreMap];
+            if (key && key in preferences) {
+                (preferences as any)[key] = true;
+            }
         });
 
-        router.push('/onboarding/success');
+        return preferences;
     };
 
     const handleAvatarPress = () => {
-        Alert.alert('Avatar', 'Avatar selection will be implemented');
+        Alert.alert('Avatar', 'Seleção de avatar será implementada');
     };
 
     return (
         <OnboardingLayout
-            title="Complete Your Profile 📝"
-            subtitle="Don't worry, only you can see your personal data. No one else will be able to see it."
+            title="Complete Seu Perfil 📝"
+            subtitle="Preencha seus dados pessoais para finalizar a criação da sua conta."
             progressWidth="100%"
             onContinue={handleContinue}
+            continueDisabled={registering}
         >
             {/* Avatar */}
             <TouchableOpacity
@@ -71,37 +250,68 @@ export default function OnboardingProfile() {
             {/* Form */}
             <View style={styles.form}>
                 <Input
-                    label="Full Name"
+                    label="Nome Completo"
                     value={formData.fullName}
                     onChangeText={(text) => setFormData(prev => ({ ...prev, fullName: text }))}
-                    placeholder="Enter your full name"
+                    placeholder="Digite seu nome completo"
+                    autoCapitalize="words"
                 />
 
                 <Input
-                    label="Phone Number"
+                    label="Email"
+                    value={formData.email}
+                    onChangeText={(text) => setFormData(prev => ({ ...prev, email: text }))}
+                    placeholder="Digite seu email"
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                />
+
+                <Input
+                    label="Telefone"
                     value={formData.phoneNumber}
                     onChangeText={(text) => setFormData(prev => ({ ...prev, phoneNumber: text }))}
-                    placeholder="Enter your phone number"
+                    placeholder="Digite seu telefone"
                     keyboardType="phone-pad"
                 />
 
                 <Input
-                    label="Date of Birth"
+                    label="Data de Nascimento"
                     value={formData.dateOfBirth}
                     onChangeText={(text) => setFormData(prev => ({ ...prev, dateOfBirth: text }))}
-                    placeholder="MM/DD/YYYY"
+                    placeholder="YYYY-MM-DD"
                     rightIcon="calendar"
+                />
+
+                <Input
+                    label="Senha"
+                    value={formData.password}
+                    onChangeText={(text) => setFormData(prev => ({ ...prev, password: text }))}
+                    placeholder="Digite sua senha"
+                    secureTextEntry={!showPassword}
+                    rightIcon={showPassword ? "eye-off" : "eye"}
+                    onRightIconPress={() => setShowPassword(!showPassword)}
+                />
+
+                <Input
+                    label="Confirmar Senha"
+                    value={formData.confirmPassword}
+                    onChangeText={(text) => setFormData(prev => ({ ...prev, confirmPassword: text }))}
+                    placeholder="Confirme sua senha"
+                    secureTextEntry={!showConfirmPassword}
+                    rightIcon={showConfirmPassword ? "eye-off" : "eye"}
+                    onRightIconPress={() => setShowConfirmPassword(!showConfirmPassword)}
                 />
 
                 <View style={styles.countryContainer}>
                     <Text style={[styles.countryLabel, { color: theme.colors.text }]}>
-                        Country
+                        País
                     </Text>
                     <TouchableOpacity
                         style={[styles.countrySelector, {
                             borderColor: theme.colors.border,
                             backgroundColor: theme.colors.surface
                         }]}
+                        onPress={() => Alert.alert('Seleção de País', 'Seleção de país será implementada')}
                     >
                         <Text style={[styles.countryText, { color: theme.colors.text }]}>
                             {formData.country}
@@ -114,6 +324,15 @@ export default function OnboardingProfile() {
                     </TouchableOpacity>
                 </View>
             </View>
+
+            {/* Loading indicator */}
+            {registering && (
+                <View style={styles.loadingContainer}>
+                    <Text style={[styles.loadingText, { color: theme.colors.textSecondary }]}>
+                        Criando sua conta...
+                    </Text>
+                </View>
+            )}
         </OnboardingLayout>
     );
 }
@@ -164,5 +383,13 @@ const styles = StyleSheet.create({
     },
     countryText: {
         fontSize: 16,
+    },
+    loadingContainer: {
+        alignItems: 'center',
+        marginTop: 16,
+    },
+    loadingText: {
+        fontSize: 14,
+        fontStyle: 'italic',
     },
 });

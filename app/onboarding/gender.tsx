@@ -1,4 +1,4 @@
-// app/onboarding/gender.tsx - Usando OnboardingLayout
+// app/onboarding/gender.tsx - Usando dados temporários
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
@@ -40,18 +40,20 @@ const genderOptions: GenderOption[] = [
 export default function OnboardingGender() {
     const router = useRouter();
     const { theme } = useThemeStore();
-    const { updateUser } = useUserStore();
-    const [selectedGender, setSelectedGender] = useState<Gender | null>(null);
+    const { tempUserData, updateTempUserData } = useUserStore();
+    const [selectedGender, setSelectedGender] = useState<Gender | null>(
+        tempUserData?.gender || null
+    );
 
     const handleContinue = () => {
         if (selectedGender) {
-            updateUser({ gender: selectedGender });
+            updateTempUserData({ gender: selectedGender });
             router.push('/onboarding/age');
         }
     };
 
     const handleSkip = () => {
-        updateUser({ gender: 'not_specified' });
+        updateTempUserData({ gender: 'not_specified' });
         router.push('/onboarding/age');
     };
 
